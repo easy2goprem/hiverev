@@ -1,0 +1,61 @@
+r37bn00
+
+import java.io.IOException;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.hive.conf.HiveConf;
+import org.apache.hadoop.hive.conf.HiveConf.ConfVars;
+
+public class JdbcHiveSampleClient {
+String JDBC_DRIVER = "org.apache.hive.jdbc.HiveDriver";  
+
+/**
+* @param args
+* @throws SQLException
+*/
+public static void main(String[] args) throws SQLException {
+try {
+Class.forName(JDBC_DRIVER);
+} catch (ClassNotFoundException e) {
+// TODO Auto-generated catch block
+e.printStackTrace();
+System.exit(1);
+}
+String JDBC_DB_URL = "jdbc:hive2://r37an00.bnymellon.net:10000/default;";
+String QUERY = "SELECT * FROM default.hadooploadtest LIMIT 10";
+
+Connection con = DriverManager.getConnection(JDBC_DB_URL);
+Statement stmt = con.createStatement();
+ResultSet res = stmt.executeQuery(QUERY);
+System.out.println("Running: " + sql);
+//res = stmt.executeQuery(sql);
+while (res.next()) {
+System.out.println(String.valueOf(res.getInt(1)) + "\t" + res.getString(2));
+}
+
+}
+}
+========================
+javac -classpath $HADOOP_HOME/hadoop-common-2.4.0.2.1.2.0-402.jar:$HADOOP_HOME/lib/commons-cli-1.2.jar:/usr/lib/hive/lib/hive-jdbc-0.13.0.2.1.2.0-402.jar:/usr/lib/hadoop/hadoop-annotations-2.4.0.2.1.2.0-402.jar:/usr/lib/hive/lib/hive-common-0.13.0.2.1.2.0-402.jar:/usr/lib/hadoop/lib/mysql-connector-java.jar:/usr/lib/hive/lib/hive-metastore-0.13.0.2.1.2.0-402.jar JdbcHiveSampleClient.java
+
+java -cp .
+=========================
+// load data into table
+// NOTE: filepath has to be local to the hive server
+// NOTE: /tmp/a.txt is a ctrl-A separated file with two fields per line
+String filepath = "/tmp/a.txt";
+sql = "load data local inpath '" + filepath + "' into table " + tableName;
+System.out.println("Running: " + sql);
+res = stmt.executeQuery(sql);
+
+// select * query
+sql = "select * from " + tableName;
+System.out.println("Running: " + sql);
+res = stmt.executeQuery(sql);
+while (res.next()) {
+System.out.println(String.valueOf(res.getInt(1)) + "\t" + res.getString(2));
+}

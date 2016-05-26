@@ -1,0 +1,472 @@
+Steps that has been recomended and modified by Hwx team.
+-------------------------------------------------------------------------------------------
+Prerequest
+----------
+export JAVA_HOME=/usr/java/jdk1.7.0_67/bin
+export PATH=$PATH:/usr/lib64/qt-3.3/bin:/usr/local/bin:/usr/bin:/usr/local/sbin:/usr/sbin:/sbin:/usr/java/jdk1.7.0_67/bin:/usr/lib/hadoop/bin:/usr/lib/hive/bin:/usr/lib/pig/bin:/usr/local/apache-maven-3.2.5/apache-maven-3.2.5/bin:/usr/hdp/2.2.6.0-2800/storm/bin
+
+:/bin
+
+Creating a maven project
+------------------------
+mvn archetype:generate -DgroupId=com.hortonworks.pso -DartifactId=Storm_Num -DarchetypeArtifactId=maven-archetype-quickstart -DinteractiveMode=false
+
+It will create a directory with the class name given(Storm_Num)
+
+Copy the java code into the below path of ./Storm_Num
+
+/src/main/java/com/hortonworks/pso
+
+Copy the core-site.xml and hdfs-site.xml to the below path 
+
+/src/main/resources
+
+there will a pom.xml file created in present directory. replace the pom.xml with the code given below. 
+
+do mvn clean install to build the code. 
+
+Which will create a directory named /target in present directory
+
+do cd to target and run the jar created by mvn 
+
+storm jar Storm_Num-1.0-SNAPSHOT.jar Storm_Num -c nimbus.host=r38sp00.bnymellon.net
+
+--------------------------------------------------------------------------------------------------
+//Java Code.
+---------
+import backtype.storm.StormSubmitter;
+import org.apache.storm.hdfs.bolt.format.DefaultFileNameFormat;
+import org.apache.storm.hdfs.bolt.format.DelimitedRecordFormat;
+import org.apache.storm.hdfs.bolt.format.FileNameFormat;
+import org.apache.storm.hdfs.bolt.format.RecordFormat;
+import org.apache.storm.hdfs.bolt.rotation.FileRotationPolicy;
+import org.apache.storm.hdfs.bolt.rotation.FileSizeRotationPolicy;
+import org.apache.storm.hdfs.bolt.rotation.FileSizeRotationPolicy.Units;
+import org.apache.storm.hdfs.bolt.HdfsBolt;
+import org.apache.storm.hdfs.bolt.AbstractHdfsBolt;
+import org.apache.storm.hdfs.bolt.sync.CountSyncPolicy;
+import org.apache.storm.hdfs.bolt.sync.SyncPolicy;
+import org.apache.storm.hdfs.common.rotation.MoveFileAction;
+import org.yaml.snakeyaml.Yaml;
+import backtype.storm.spout.SpoutOutputCollector;
+import backtype.storm.task.TopologyContext;
+import backtype.storm.topology.OutputFieldsDeclarer;
+import backtype.storm.topology.base.BaseRichSpout;
+import backtype.storm.tuple.Fields;
+import backtype.storm.tuple.Values;
+import java.util.Map;
+import backtype.storm.task.OutputCollector;
+import backtype.storm.topology.base.BaseRichBolt;
+import backtype.storm.tuple.Tuple;
+import backtype.storm.utils.Utils;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
+import backtype.storm.Config;
+import backtype.storm.LocalCluster;
+import backtype.storm.topology.TopologyBuilder;
+import java.io.IOException;
+import java.io.BufferedWriter;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.util.List;
+import java.util.ArrayList;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
+import java.io.FileInputStream;
+import java.io.InputStream;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+
+public class Storm_Num{
+private static int currentNumber = 1;
+private static class NumberSpout extends BaseRichSpout
+{
+    private SpoutOutputCollector collector;
+
+    @Override
+    public void open( Map conf, TopologyContext context, SpoutOutputCollector collector )
+    {
+        this.collector = collector;
+    }
+
+    @Override
+    public void nextTuple()
+    {
+        collector.emit( new Values( new Integer( currentNumber++ ) ) );
+    }
+
+    @Override
+    public void ack(Object id)
+    {
+    }
+
+    @Override
+    public void fail(Object id)
+    {
+    }
+
+    @Override
+    public void declareOutputFields(OutputFieldsDeclarer declarer)
+    {
+        declarer.declare( new Fields( "number" ) );
+    }
+}
+
+private static class PrimeNumberBolt extends BaseRichBolt
+{
+    private OutputCollector collector;
+
+    public void prepare( Map conf, TopologyContext context, OutputCollector collector )
+    {
+        this.collector = collector;
+    }
+
+    public void execute( Tuple tuple )
+    {
+        int number = tuple.getInteger( 0 );
+        if( isPrime( number) )
+        {
+                System.out.println(number);
+                                collector.emit(new Values(number ));
+
+        }
+        collector.ack( tuple );
+    }
+
+    public void declareOutputFields( OutputFieldsDeclarer declarer )
+    {
+        declarer.declare( new Fields( "number" ) );
+    }
+
+    private boolean isPrime( int n )
+    {
+        if( n == 1 || n == 2 || n == 3 )
+        {
+            return true;
+        }
+        if( n % 2 == 0 )
+        {
+            return false;
+        }
+
+        for( int i=3; i*i<=n; i+=2 )
+        {
+            if( n % i == 0)
+            {
+                return false;
+            }
+        }
+        return true;
+    }
+}
+private static class HdfsBolT1 extends BaseRichBolt
+{
+    private OutputCollector collector;
+    private List<Integer> prime_num;
+
+    @SuppressWarnings("rawtypes")
+    public void prepare(
+        Map stormConf,
+        TopologyContext context,
+        OutputCollector collector)
+    {
+        this.collector = collector;
+        }
+
+    public void execute(Tuple input)
+    {
+        System.out.println("in HDFS BOLT");
+        int number = input.getInteger( 0 );
+        this.prime_num.add(number);
+                if(this.prime_num.size()>=500)
+                {
+                writeToHDFS();
+                this.prime_num = new ArrayList<Integer>(500);
+                }
+    }
+
+    private void writeToHDFS()
+    {
+        FileSystem hdfs = null;
+        Path file = null;
+        OutputStream os = null;
+        BufferedWriter wd = null;
+        try
+        {
+            Configuration conf = new Configuration();
+            conf.addResource(new Path("/etc/hadoop/conf/core-site.xml"));
+            conf.addResource(new Path("/etc/hadoop/conf/hdfs-site.xml"));
+            hdfs = FileSystem.get(conf);
+            file = new Path("/tmp/storm_output.txt");
+            if (hdfs.exists(file))
+                os = hdfs.append(file);
+            else
+                os = hdfs.create(file);
+            wd = new BufferedWriter(new OutputStreamWriter(os, "UTF-8"));
+            for (Integer prime_no : prime_num)
+            {
+                wd.write(prime_no);
+            }
+        }
+        catch (IOException ex)
+        {
+            System.out.println(ex);
+        }
+        finally
+        {
+            try
+            {
+                if (os != null) os.close();
+                if (wd != null) wd.close();
+                if (hdfs != null) hdfs.close();
+            }
+            catch (IOException ex)
+            {
+
+                System.out.println(ex);
+            }
+        }
+    }
+
+    public void declareOutputFields(OutputFieldsDeclarer declarer) { }
+}
+public static void main(String[] args)
+{
+    RecordFormat format = new DelimitedRecordFormat().withFieldDelimiter("|");
+    /*Synchronize data buffer with the filesystem every 1000 tuples*/
+    SyncPolicy syncPolicy = new CountSyncPolicy(1000);
+    /* Rotate data files when they reach five MB*/
+    FileRotationPolicy rotationPolicy = new FileSizeRotationPolicy(5.0f, Units.MB);
+    /* Use default, Storm-generated file names*/
+    FileNameFormat fileNameFormat = new DefaultFileNameFormat().withPath("/tmp/infosec/");
+
+    HdfsBolt bolt = new HdfsBolt()
+                .withFsUrl("hdfs://myclustertestcnj")
+                .withFileNameFormat(fileNameFormat)
+                .withRecordFormat(format)
+                .withRotationPolicy(rotationPolicy)
+                .withSyncPolicy(syncPolicy)
+                .withConfigKey("hdfs.config")
+                .addRotationAction(new MoveFileAction().toDestination("/tmp/storm_output/"));
+
+   Map<String, Object> map = new HashMap<String,Object>();
+   map.put("hdfs.keytab.file","/users/home/xbblwv5/xbblwv5.keytab");
+   map.put("hdfs.kerberos.principal","xbblwv5@HADOOP-DQA-CNJ01.BNYMELLON.NET");
+
+   Config config = new Config();
+   config.put("hdfs.config", map);
+
+   TopologyBuilder builder = new TopologyBuilder();
+   builder.setSpout( "spout", new NumberSpout() );
+   builder.setBolt( "prime", new PrimeNumberBolt()).shuffleGrouping("spout");
+   builder.setBolt( "hdfs_bolt", bolt).shuffleGrouping("prime");
+
+   LocalCluster cluster = new LocalCluster();
+   cluster.submitTopology("HDFS_TOPOLOGY", config, builder.createTopology());
+   Utils.sleep(10000);
+   cluster.killTopology("HDFS_TOPOLOGY");
+   cluster.shutdown();
+
+    }
+}
+
+===========================================================================
+
+pom.xml
+-------
+
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>com.hortonworks.pso</groupId>
+  <artifactId>Storm_Num</artifactId>
+  <packaging>jar</packaging>
+  <version>1.0-SNAPSHOT</version>
+  <name>HWX :: PSO Data Generator</name>
+  <url>http://www.hortonworks.com</url>
+
+  <properties>
+    <hdp.version>2.6.0</hdp.version>
+  </properties>
+
+  <repositories>
+    <repository>
+     <releases>
+      <enabled>true</enabled>
+      <updatePolicy>always</updatePolicy>
+      <checksumPolicy>warn</checksumPolicy>
+    </releases>
+    <snapshots>
+      <enabled>false</enabled>
+      <updatePolicy>never</updatePolicy>
+      <checksumPolicy>fail</checksumPolicy>
+    </snapshots>
+    <id>HDPReleases</id>
+    <name>HDP Releases</name>
+    <url>http://repo.hortonworks.com/content/repositories/releases/</url>
+    <layout>default</layout>
+  </repository>
+  <repository>
+    <id>clojars.org</id>
+    <url>http://clojars.org/repo</url>
+  </repository>
+</repositories>
+
+<build>
+  <plugins>
+    <plugin>
+      <groupId>org.apache.maven.plugins</groupId>
+      <artifactId>maven-shade-plugin</artifactId>
+      <version>1.4</version>
+      <configuration>
+        <createDependencyReducedPom>true</createDependencyReducedPom>
+      </configuration>
+      <executions>
+        <execution>
+          <phase>package</phase>
+          <goals>
+            <goal>shade</goal>
+          </goals>
+          <configuration>
+            <transformers>
+              <transformer
+                implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
+                <transformer
+                  implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                  <mainClass></mainClass>
+                </transformer>
+              </transformers>
+              <filters>
+                <filter>
+                  <artifact>*:*</artifact>
+                  <excludes>
+                    <exclude>META-INF/*.SF</exclude>
+                    <exclude>META-INF/*.DSA</exclude>
+                    <exclude>META-INF/*.RSA</exclude>
+                  </excludes>
+                </filter>
+              </filters>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+
+
+
+  <dependencies>
+    <dependency>
+      <groupId>org.apache.storm</groupId>
+      <artifactId>storm-hdfs</artifactId>
+      <version>0.9.3</version>
+      <type>jar</type>
+      <exclusions>
+        <exclusion>
+          <groupId>log4j</groupId>
+          <artifactId>log4j</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.slf4j</groupId>
+          <artifactId>slf4j-log4j12</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.storm</groupId>
+      <artifactId>storm-hdfs</artifactId>
+      <version>0.9.3</version>
+      <exclusions>
+        <exclusion>
+          <groupId>log4j</groupId>
+          <artifactId>log4j</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.slf4j</groupId>
+          <artifactId>slf4j-log4j12</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.storm</groupId>
+      <artifactId>storm-hbase</artifactId>
+      <version>0.9.3</version>
+      <type>jar</type>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.storm</groupId>
+      <artifactId>storm-hbase</artifactId>
+      <version>0.9.3</version>
+      <exclusions>
+        <exclusion>
+          <groupId>log4j</groupId>
+          <artifactId>log4j</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.slf4j</groupId>
+          <artifactId>slf4j-log4j12</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.hadoop</groupId>
+      <artifactId>hadoop-hdfs</artifactId>
+      <version>2.6.0</version>
+      <type>jar</type>
+      <exclusions>
+        <exclusion>
+          <groupId>log4j</groupId>
+          <artifactId>log4j</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.slf4j</groupId>
+          <artifactId>slf4j-log4j12</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.hadoop</groupId>
+      <artifactId>hadoop-common</artifactId>
+      <version>2.6.0</version>
+      <type>jar</type>
+      <exclusions>
+        <exclusion>
+          <groupId>log4j</groupId>
+          <artifactId>log4j</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.slf4j</groupId>
+          <artifactId>slf4j-log4j12</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.storm</groupId>
+      <artifactId>storm-core</artifactId>
+      <version>0.9.3</version>
+      <type>jar</type>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.anarres.lzo</groupId>
+      <artifactId>lzo-hadoop</artifactId>
+      <version>1.0.0</version>
+      <exclusions>
+        <exclusion>
+          <groupId>log4j</groupId>
+          <artifactId>log4j</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.slf4j</groupId>
+          <artifactId>slf4j-log4j12</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+  </dependencies>
+
+</project>
+
+

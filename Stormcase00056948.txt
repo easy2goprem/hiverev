@@ -1,0 +1,108 @@
+
+  "kerberos.name.rules": "RULE:[1:$1@$0](dshm00m@HADOOP-DQA-CNJ01.BNYMELLON.NET)s/.*/dshm00m/ RULE:[1:$1@$0](dshmbtm@HADOOP-DQA-CNJ01.BNYMELLON.NET)s/.*/dshmbtm/ RULE:[1:$1@$0](dshmhtm@HADOOP-DQA-CNJ01.BNYMELLON.NET)s/.*/dshmhtm/ RULE:[1:$1@$0](.*@HADOOP-DQA-CNJ01.BNYMELLON.NET)s/@.*// RULE:[1:$1@$0](.*@.*HADOOP-DQA-CNJ01.BNYMELLON.NET)s/@.*// RULE:[1:$1@$0](.*@AMS.BNYMELLON.NET)s/@.*// RULE:[1:$1@$0](.*@EUR.BNYMELLON.NET)s/@.*// RULE:[1:$1@$0](.*@PAC.BNYMELLON.NET)s/@.*// RULE:[1:$1@$0](.*@HADOOP-DQA-CNJ01.BNYMELLON.NET)s/@.*// RULE:[1:$1@$0](.*@.*HADOOP-DQA-CNJ01.BNYMELLON.NET)s/@.*// RULE:[2:$1@$0](amshbase@HADOOP-DQA-CNJ01.BNYMELLON.NET)s/.*/dshm16m/  RULE:[2:$1@$0](hbase@.*HADOOP-DQA-CNJ01.BNYMELLON.NET)s/.*/dshmbtm/ RULE:[2:$1@$0](hbase@HADOOP-DQA-CNJ01.BNYMELLON.NET)s/.*/dshmbtm/ RULE:[2:$1@$0](hive/.*@HADOOP-DQA-CNJ01.BNYMELLON.NET)s/.*/dshmvtm/ RULE:[2:$1@$0](hive@.*HADOOP-DQA-CNJ01.BNYMELLON.NET)s/.*/dshmvtm/ RULE:[2:$1@$0](hive@HADOOP-DQA-CNJ01.BNYMELLON.NET)s/.*/dshmvtm/ RULE:[2:$1@$0](jhs@HADOOP-DQA-CNJ01.BNYMELLON.NET)s/.*/dshmmtm/ RULE:[2:$1@$0](jn@HADOOP-DQA-CNJ01.BNYMELLON.NET)s/.*/dshmhtm/ RULE:[2:$1@$0](knox@HADOOP-DQA-CNJ01.BNYMELLON.NET)s/.*/knox/ RULE:[2:$1@$0](nm@HADOOP-DQA-CNJ01.BNYMELLON.NET)s/.*/dshmytm/ RULE:[2:$1@$0](nn@HADOOP-DQA-CNJ01.BNYMELLON.NET)s/.*/dshmhtm/ DEFAULT
+"
+ protobuf-java-2.5.0.jar
+-rw-r--r-- 1 root root   533455 Sep 10 08:53 protobuf-java.jar
+-rw-r--r-- 1 root root  7909467 Sep 10 08:53 hadoop-hdfs-2.6.0.2.2.6.0-2800.jar
+-rw-r--r-- 1 root root  7909467 Sep 10 08:53 hadoop-hdfs.jar
+-rw-r--r-- 1 root root    41123 Sep 10 08:53 commons-cli.jar
+-rw-r--r-- 1 root root    41123 Sep 10 08:53 commons-cli-1.2.jar
+-rw-r--r-- 1 root root    31212 Sep 10 08:53 htrace-core.jar
+-rw-r--r-- 1 root root    31212 Sep 10 08:53 htrace-core-3.0.4.jar
+
+
+cd /usr/hdp/2.2.6.0-2800/storm/lib;
+
+cp ../../hadoop/client/protobuf-java* ../../hadoop/client/hadoop-hdfs* ../../hadoop/client/commons-cli* ../../hadoop/client/htrace-core* .
+
+
+
+"kerberos.name.rules": "RULE:[1:$1@$0](dshm00m@HADOOP-DQA-CNJ01.BNYMELLON.NET)s/.*/dshm00m/ RULE:[1:$1@$0](dshmbtm@HADOOP-DQA-CNJ01.BNYMELLON.NET)s/.*/dshmbtm/ RULE:[1:$1@$0](dshmhtm@HADOOP-DQA-CNJ01.BNYMELLON.NET)s/.*/dshmhtm/ RULE:[1:$1@$0](dshmqtm@HADOOP-DQA-CNJ01.BNYMELLON.NET)s/.*/dshmqtm/ RULE:[1:$1@$0](.*@HADOOP-DQA-CNJ01.BNYMELLON.NET)s/@.*// RULE:[1:$1@$0](.*@.*HADOOP-DQA-CNJ01.BNYMELLON.NET)s/@.*// RULE:[1:$1@$0](.*@AMS.BNYMELLON.NET)s/@.*// RULE:[1:$1@$0](.*@EUR.BNYMELLON.NET)s/@.*// RULE:[1:$1@$0](.*@PAC.BNYMELLON.NET)s/@.*// RULE:[1:$1@$0](.*@HADOOP-DQA-CNJ01.BNYMELLON.NET)s/@.*// RULE:[1:$1@$0](.*@.*HADOOP-DQA-CNJ01.BNYMELLON.NET)s/@.*// RULE:[2:$1@$0](amshbase@HADOOP-DQA-CNJ01.BNYMELLON.NET)s/.*/dshm16m/ RULE:[2:$1@$0](dn@HADOOP-DQA-CNJ01.BNYMELLON.NET)s/.*/dshmhtm/ RULE:[2:$1@$0](falcon@HADOOP-DQA-CNJ01.BNYMELLON.NET)s/.*/falcon/ RULE:[2:$1@$0](hbase@.*HADOOP-DQA-CNJ01.BNYMELLON.NET)s/.*/dshmbtm/ RULE:[2:$1@$0](hbase@HADOOP-DQA-CNJ01.BNYMELLON.NET)s/.*/dshmbtm/ RULE:[2:$1@$0](hive/.*@HADOOP-DQA-CNJ01.BNYMELLON.NET)s/.*/dshmvtm/ RULE:[2:$1@$0](hive@.*HADOOP-DQA-CNJ01.BNYMELLON.NET)s/.*/dshmvtm/ RULE:[2:$1@$0](hive@HADOOP-DQA-CNJ01.BNYMELLON.NET)s/.*/dshmvtm/ RULE:[2:$1@$0](jhs@HADOOP-DQA-CNJ01.BNYMELLON.NET)s/.*/dshmmtm/ RULE:[2:$1@$0](jn@HADOOP-DQA-CNJ01.BNYMELLON.NET)s/.*/dshmhtm/ RULE:[2:$1@$0](knox@HADOOP-DQA-CNJ01.BNYMELLON.NET)s/.*/knox/ RULE:[2:$1@$0](nm@HADOOP-DQA-CNJ01.BNYMELLON.NET)s/.*/dshmytm/ RULE:[2:$1@$0](nn@HADOOP-DQA-CNJ01.BNYMELLON.NET)s/.*/dshmhtm/ RULE:[2:$1@$0](oozie@.*HADOOP-DQA-CNJ01.BNYMELLON.NET)s/.*/dshmotm/ RULE:[2:$1@$0](oozie@HADOOP-DQA-CNJ01.BNYMELLON.NET)s/.*/dshmotm/ RULE:[2:$1@$0](rm@HADOOP-DQA-CNJ01.BNYMELLON.NET)s/.*/dshmytm/ RULE:[2:$1@$0](yarn@HADOOP-DQA-CNJ01.BNYMELLON.NET)s/.*/dshmytm/ RULE:[2:$1@$0](zookeeper@HADOOP-DQA-CNJ01.BNYMELLON.NET)s/.*/dshm16m/ DEFAULT"
+
+
+
+
+
+------------------------------------
+chown -R root:wecdshht /etc/storm/conf/*
+
+
+
+ln -s /etc/hadoop/conf/hdfs-site.xml /etc/storm/conf/hdfs-site.xml
+
+
+chown -R root:wecdshht /etc/storm/conf/*
+[root@r39fn00 lib]# ln -s /etc/hadoop/conf/hdfs-site.xml /etc/storm/conf/hdfs-site.xml
+[root@r39fn00 lib]# chmod o+r /etc/security/keytabs/hdfs.headless.keytab
+
+
+
+------------
+storm-site.xml - Add property 
+
+hdfs.kerberos.principal : dshmhtm@HADOOP-DQA-CNJ01.BNYMELLON.NET
+hdfs.keytab.file : /etc/security/keytabs/hdfs.headless.keytab
+
+
+
+----------------------------------------
+Attached to case 
+
+/etc/storm/conf 
+/var/log/storm/nimbus.log -10000 
+/var/log/storm/ui.log -10000
+/var/log/storm/drpc.log -10000
+/var/log/storm/nimbus.out
+/var/log/storm/ui.out
+/var/log/storm/drpc.out
+
+
+-----------------------------------------------------------====================
+
+Chat with Ratish - 
+------------------
+
+from prem to Everyone:
+Hi Ratish 
+from prem to Everyone:
+Im in
+from Ratish Maruthiyodan to Everyone:
+Hi Prem
+from Ratish Maruthiyodan to Everyone:
+sorry, I had to be away from desk for some time
+from Ratish Maruthiyodan to Everyone:
+ Firefox: Goto about:config and search for network.negotiate-auth.trusted-uris double-click to add value "http://storm-ui-hostname:8080" 
+- Google-chrome: start from command line with: google-chrome --auth-server-whitelist="storm-ui-hostname" --auth-negotiate-delegate-whitelist="storm-ui-hostname" 
+- IE: Configure trusted websites to include "storm-ui-hostname" and allow negotiation for that website 
+from Ratish Maruthiyodan to Everyone:
+ Firefox: Goto about:config and search for network.negotiate-auth.trusted-uris double-click to add value "http://storm-ui-hostname:8080" 
+- Google-chrome: start from command line with: google-chrome --auth-server-whitelist="storm-ui-hostname" --auth-negotiate-delegate-whitelist="storm-ui-hostname" 
+- IE: Configure trusted websites to include "storm-ui-hostname" and allow negotiation for that website 
+
+from Ratish Maruthiyodan to Everyone:
+ksetup /addkdc HADOOP-DQA-CNJ01.BNYMELLON.NET r39bn00.bnymellon.net 
+ksetup /addhosttorealmmap r39bn00.bnymellon.net HADOOP-DQA-CNJ01.BNYMELLON.NET 
+
+from Ratish Maruthiyodan to Everyone:
+http://r39bn00.bnymellon.net:8744
+from Ratish Maruthiyodan to Everyone:
+ranger admin http port 6080
+from Ratish Maruthiyodan to Everyone:
+ln -s /etc/hadoop/conf/hdfs-site.xml /etc/storm/conf/hdfs-site.xml
+from prem to Everyone:
+Hi Ratish 
+from prem to Everyone:
+Im In 
+from Ratish Maruthiyodan to Everyone:
+Hi Prem
+from Ratish Maruthiyodan to Everyone:
+I will join in a short while from now. I am checking about the keytabs for hdfs & other services within storm
+from prem to Everyone:
+okay sure
+from Ratish Maruthiyodan to Everyone:
+http://hortonworks.com/community/forums/topic/storm-cannot-connect-to-hdfs-in-ha-mode/
+
+
+===========================
+
+
